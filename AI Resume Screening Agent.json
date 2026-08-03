@@ -1,0 +1,422 @@
+{
+  "name": "AI Resume Screening Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Resume:\n\n{{ $json.text }}\n\nJob Description:\n\nWe are hiring a Full Stack MERN Developer.\n\nRequired Skills:\n- React\n- Node.js\n- Express.js\n- MongoDB\n- Git\n- HTML\n- CSS\n- JavaScript\n- REST APIs\n\nExtract the following information ONLY from the resume.\n\nReturn ONLY valid JSON.\n\n{\n  \"candidate_name\": \"\",\n  \"email\": \"\",\n  \"phone\": \"\",\n  \"match_score\": 0,\n  \"matching_skills\": [],\n  \"missing_skills\": [],\n  \"recommendation\": \"\"\n}",
+        "options": {
+          "systemMessage": "=You are an expert ATS Resume Screening System.\n\nAnalyze ONLY the provided resume.\n\nNever invent information.\n\nNever use placeholder values like:\n\nJohn Doe\njohndoe@example.com\n123-456-7890\n\nIf information is missing, return an empty string.\n\nReturn ONLY valid JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        0
+      ],
+      "id": "282d12f1-a667-4f1e-af49-065d557269d7",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1-B4fK5ECiCmUDmWG5QRSkAJHthSq3SqId0DVKzA7Fgc",
+          "mode": "list",
+          "cachedResultName": "Resume Screening Results",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-B4fK5ECiCmUDmWG5QRSkAJHthSq3SqId0DVKzA7Fgc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-B4fK5ECiCmUDmWG5QRSkAJHthSq3SqId0DVKzA7Fgc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Name": "={{ $json.candidate_name }}",
+            "Email": "={{ $json.email }}",
+            "Match Score": "={{ $json.match_score }}",
+            "Phone": "={{ $json.phone }}",
+            "Recommendation": "={{ $json.recommendation }}",
+            "Screening Date": "={{ $now.toFormat(\"yyyy-MM-dd\") }}",
+            "Matching Skills": "={{ $json.matching_skills.join(\", \") }}",
+            "Missing Skills": "={{ $json.missing_skills.join(\", \") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Match Score",
+              "displayName": "Match Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Matching Skills",
+              "displayName": "Matching Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Missing Skills",
+              "displayName": "Missing Skills",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Screening Date",
+              "displayName": "Screening Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "ac0ecb52-89c6-4668-9a7e-4f23ad9e8989",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oWDbCe9dsNQ7quco",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const ai = JSON.parse($json.output);\n\nreturn {\n  json: ai\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ],
+      "id": "c32b589d-0917-4109-874c-1df62c6c3f82",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "4119bd0b-812c-441f-b29e-523316205439",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        528,
+        224
+      ],
+      "id": "d473ae4e-5b45-4a64-b17d-2db577557c61",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "10f2OWRoVilWKjN8",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "3067dd64-28d4-437b-919e-6634b8e68dd6",
+        "responseMode": "responseNode",
+        "options": {
+          "binaryPropertyName": "data"
+        }
+      },
+      "id": "c696d0c1-5d86-40e6-974e-88ad6c4c5873",
+      "name": "Resume Upload Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "3067dd64-28d4-437b-919e-6634b8e68dd6"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "data0",
+        "options": {}
+      },
+      "id": "0f082016-53bc-4450-a28a-af4d958b228f",
+      "name": "Extract Resume Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Workflow Overview\n\nThis workflow accepts a resume PDF, extracts the text, analyzes it using AI, saves the results to Google Sheets, and returns a JSON response.\n",
+        "height": 192,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -656,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "87914b76-5e3f-4edc-a83c-c3bc1b3cedad",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Webhook\n\nReceives a PDF resume through a POST webhook request.\nThe uploaded file is stored as binary data.",
+        "height": 240,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -128,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "6afe848b-be72-4d19-bb57-538c1df1ba3b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Extract from File\n\nExtracts plain text from the uploaded PDF.\nThis text is passed to the AI model for analysis.",
+        "height": 240
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "cf4dcc26-fcd4-4ede-bfec-25b3874362be",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## AI Agent\n\nUses an LLM to analyze the resume against the job description.\n\nExtracts:\n• Candidate Name\n• Email\n• Phone\n• Match Score\n• Matching Skills\n• Missing Skills\n• Recommendation",
+        "height": 400,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        432,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "2eff0c08-8938-466a-b6b5-3b5b6f04fa5b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## JavaScript Code\n\nConverts the AI response into a structured JSON object so other nodes can use the data.",
+        "height": 208,
+        "width": 224
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "d8a8fe96-2f29-4bf5-a237-3d943df92627",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Google Sheets\n\nStores the screening results in Google Sheets for tracking and reporting.",
+        "height": 208,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        976,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "3ff047a9-40f2-493a-90e3-6136f7518b9f",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Respond to Webhook\n\nReturns the screening results as JSON to the API client after the workflow finishes.",
+        "height": 208
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "0fc7dd2b-90db-4151-8b21-e221746e380e",
+      "name": "Sticky Note6"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Upload Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Resume Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Resume Text": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d4218c1b-fd1a-4f48-bdb7-21eee3e6b656",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1c93a4bce2c224d7768f6d8569f8e531406ccc444ced344a73230a3ab92ac2b5"
+  },
+  "nodeGroups": [],
+  "id": "27DtfwQnwOgZ4ekq",
+  "tags": []
+}
